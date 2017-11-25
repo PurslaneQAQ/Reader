@@ -80,12 +80,9 @@ public class ReadActivity extends AppCompatActivity implements GestureDetector.O
     ArrayList<String> person_country;
 
     //拿来标记设过的span的位置
-    ArrayList<ArrayList<Integer>> country_min;
-    ArrayList<ArrayList<Integer>> country_max;
-    ArrayList<ArrayList<Integer>> city_min;
-    ArrayList<ArrayList<Integer>> city_max;
-    ArrayList<ArrayList<Integer>> person_min;
-    ArrayList<ArrayList<Integer>> person_max;
+    ArrayList<ArrayList<Integer>> country_pos;
+    ArrayList<ArrayList<Integer>> city_pos;
+    ArrayList<ArrayList<Integer>> person_pos;
     ArrayList<Integer> tempcountrymin;
     ArrayList<Integer> tempcountrymax;
     ArrayList<Integer> tempcitymin;
@@ -118,12 +115,9 @@ public class ReadActivity extends AppCompatActivity implements GestureDetector.O
         city_country=new ArrayList<String>();
         person_country=new ArrayList<String>();
 
-        country_min=new ArrayList<>();
-        country_max=new ArrayList<>();
-        city_min=new ArrayList<>();
-        city_max=new ArrayList<>();
-        person_min=new ArrayList<>();
-        person_max=new ArrayList<>();
+        country_pos = new ArrayList<>();
+        city_pos=new ArrayList<>();
+        person_pos=new ArrayList<>();
 
         back.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -176,7 +170,6 @@ public class ReadActivity extends AppCompatActivity implements GestureDetector.O
         showtext.postDelayed(new Runnable() {
             @Override
             public void run() {
-
                 tempcountrymin=new ArrayList<Integer>();
                 tempcountrymax=new ArrayList<Integer>();
                 tempcitymin=new ArrayList<Integer>();
@@ -222,18 +215,24 @@ public class ReadActivity extends AppCompatActivity implements GestureDetector.O
                         String country_js = new String(arrayOfByte);
                         JSONObject jo = new JSONObject(country_js);
                         JSONArray ja = jo.getJSONArray("read");
-                        System.out.println(ja.getJSONObject(0).getJSONArray("country").get(0).toString());
+                        System.out.println(ja.getJSONObject(0).getJSONArray("country").toString());
                         if (ja.getJSONObject(0).getString("type").equals("country")) {
-                            for(int i = 0; i < ja.getJSONObject(0).getJSONArray("country").length(); i++) {
-                                country.add(ja.getJSONObject(0).getJSONArray("country").getString(i));
-                            }
-                            for(int i = 0; i < ja.getJSONObject(0).getJSONArray("countrymax").length();i++){
-                                tempcountrymax.add(ja.getJSONObject(0).getJSONArray("countrymax").getInt(i));
-                                tempcountrymin.add(ja.getJSONObject(0).getJSONArray("countrymin").getInt(i));
+                            JSONArray jCountry = ja.getJSONObject(0).getJSONArray("country");
+                            for(int i = 0; i < jCountry.length(); i++) {
+                                System.out.println(jCountry.getJSONObject(i).getJSONArray("country_pos"));
+                                country.add(jCountry.getJSONObject(i).getString("country_name"));
+                                ArrayList<Integer> tempcountrypos = new ArrayList<>();
+                                for(int j = 0; j < jCountry.getJSONObject(i).getJSONArray("country_pos").length();j++){
+                                    System.out.println("size is "+ jCountry.getJSONObject(i).getJSONArray("country_pos").length());
+                                    tempcountrypos.add(jCountry.getJSONObject(i).getJSONArray("country_pos").getInt(j));
+                                    tempcountrymin.add(jCountry.getJSONObject(i).getJSONArray("country_pos").getInt(j));
+                                    tempcountrymax.add(jCountry.getJSONObject(i).getJSONArray("country_pos").getInt(j) + country.get(i).length());
+                                }
+                                country_pos.add(tempcountrypos);
                             }
                         }
                     }catch(JSONException e){
-                        System.out.println("Json build failed!");
+                        System.out.println("C Json build failed!");
                         e.printStackTrace();
                     }catch(IOException e){
                         System.out.println("Open country file failed!");
@@ -249,13 +248,19 @@ public class ReadActivity extends AppCompatActivity implements GestureDetector.O
                         JSONArray ja = jo.getJSONArray("read");
                         System.out.println(ja.getJSONObject(0).getJSONArray("city").get(0).toString());
                         if (ja.getJSONObject(0).getString("type").equals("city")) {
-                            for(int i = 0; i < ja.getJSONObject(0).getJSONArray("city").length(); i++) {
-                                city.add(ja.getJSONObject(0).getJSONArray("city").getString(i));
-                                city_country.add(ja.getJSONObject(0).getJSONArray("city_country").getString(i));
-                            }
-                            for(int i = 0; i < ja.getJSONObject(0).getJSONArray("citymax").length();i++){
-                                tempcitymax.add(ja.getJSONObject(0).getJSONArray("citymax").getInt(i));
-                                tempcitymin.add(ja.getJSONObject(0).getJSONArray("citymin").getInt(i));
+                            JSONArray jCity = ja.getJSONObject(0).getJSONArray("city");
+                            for(int i = 0; i < jCity.length(); i++) {
+                                System.out.println(jCity.getJSONObject(i).getJSONArray("city_pos"));
+                                city.add(jCity.getJSONObject(i).getString("city_name"));
+                                city_country.add(jCity.getJSONObject(i).getString("city_country"));
+                                ArrayList<Integer> tempcitypos = new ArrayList<>();
+                                for(int j = 0; j < jCity.getJSONObject(i).getJSONArray("city_pos").length();j++){
+                                    System.out.println("size is "+ jCity.getJSONObject(i).getJSONArray("city_pos").length());
+                                    tempcitypos.add(jCity.getJSONObject(i).getJSONArray("city_pos").getInt(j));
+                                    tempcitymin.add(jCity.getJSONObject(i).getJSONArray("city_pos").getInt(j));
+                                    tempcitymax.add(jCity.getJSONObject(i).getJSONArray("city_pos").getInt(j) + city.get(i).length());
+                                }
+                                city_pos.add(tempcitypos);
                             }
                         }
                     }catch(JSONException e){
@@ -275,13 +280,19 @@ public class ReadActivity extends AppCompatActivity implements GestureDetector.O
                         JSONArray ja = jo.getJSONArray("read");
                         System.out.println(ja.getJSONObject(0).getJSONArray("person").get(0).toString());
                         if (ja.getJSONObject(0).getString("type").equals("person")) {
-                            for(int i = 0; i < ja.getJSONObject(0).getJSONArray("person").length(); i++) {
-                                person.add(ja.getJSONObject(0).getJSONArray("person").getString(i));
-                                person_country.add(ja.getJSONObject(0).getJSONArray("person_country").getString(i));
-                            }
-                            for(int i = 0; i < ja.getJSONObject(0).getJSONArray("personmax").length();i++){
-                                temppersonmax.add(ja.getJSONObject(0).getJSONArray("personmax").getInt(i));
-                                temppersonmin.add(ja.getJSONObject(0).getJSONArray("personmin").getInt(i));
+                            JSONArray jPerson = ja.getJSONObject(0).getJSONArray("person");
+                            for (int i = 0; i < jPerson.length(); i++) {
+                                System.out.println(jPerson.getJSONObject(i).getJSONArray("person_pos"));
+                                person.add(jPerson.getJSONObject(i).getString("person_name"));
+                                person_country.add(jPerson.getJSONObject(i).getString("person_country"));
+                                ArrayList<Integer> temppersonpos = new ArrayList<>();
+                                for (int j = 0; j < jPerson.getJSONObject(i).getJSONArray("person_pos").length(); j++) {
+                                    System.out.println("size is " + jPerson.getJSONObject(i).getJSONArray("person_pos").length());
+                                    temppersonpos.add(jPerson.getJSONObject(i).getJSONArray("person_pos").getInt(j));
+                                    temppersonmin.add(jPerson.getJSONObject(i).getJSONArray("person_pos").getInt(j));
+                                    temppersonmax.add(jPerson.getJSONObject(i).getJSONArray("person_pos").getInt(j) + person.get(i).length());
+                                }
+                                person_pos.add(temppersonpos);
                             }
                         }
                     }catch(JSONException e){
@@ -295,10 +306,12 @@ public class ReadActivity extends AppCompatActivity implements GestureDetector.O
                 float v = showtext.getHeight() / showtext.getLineHeight();
                 factory.setLenH((int) v);//行数
                 factory.setLenW((int) (showtext.getWidth() / showtext.getTextSize()));//宽能容纳的文字数
+                factory.loadSentences();
                 showtext.setText(factory.setCurrentPageNum(page));
                 builder = new SpannableStringBuilder(showtext.getText().toString());
                 showtext.setText(builder);
                 readprogress.setText("当前为第"+factory.GetCurrentPageNum()+"页");
+                refreshSpan();
 
             }
         }, 300);
@@ -348,6 +361,15 @@ public class ReadActivity extends AppCompatActivity implements GestureDetector.O
                     changed[which] = true;
                     boolean finished = false;
                     System.out.println("Changed is " + which);
+                    int sentense_id = 0;
+                    while(factory.sentences.get(sentense_id) < (int)(factory.getBegin() + tempmin)){
+                        sentense_id++;
+                        if(sentense_id >= factory.sentences.size())break;
+                        System.out.println("sentense id is "+ sentense_id + "number is " + factory.sentences.get(sentense_id) + "compared with" + (factory.getBegin() + tempmin));
+                    }
+                    sentense_id = sentense_id - 1;
+                    System.out.println("sentence is " + factory.getSentence(sentense_id));
+
                     switch (which) {
                         case 0://标记为国家
                             boolean exists=false;
@@ -359,9 +381,16 @@ public class ReadActivity extends AppCompatActivity implements GestureDetector.O
                             }
                             if(!exists||country.size()==0) {
                                 country.add(selectedText);
+                                ArrayList<Integer> new_country = new ArrayList<>();
+                                new_country.add(tempmin + (int)factory.getBegin());
+                                country_pos.add(new_country);
+                                System.out.println("new country has been added, now there are " + country_pos.size() + "countries");
                             }
-                            tempcountrymin.add(tempmin);
-                            tempcountrymax.add(tempmax);
+                            else{
+                                country_pos.get(i).add(tempmin + (int)factory.getBegin());
+                            }
+                            tempcountrymin.add(tempmin + (int)factory.getBegin());
+                            tempcountrymax.add(tempmax + (int)factory.getBegin());
                             storeTag(0);
                             builder.setSpan(new BackgroundColorSpan(getResources().getColor(R.color.countryspan)), tempmin, tempmax, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             break;
@@ -375,12 +404,17 @@ public class ReadActivity extends AppCompatActivity implements GestureDetector.O
                             }
                             if(!exists2||city.size()==0){
                                 city.add(selectedText);
+                                ArrayList<Integer> new_city = new ArrayList<>();
+                                new_city.add(tempmin + (int)factory.getBegin());
+                                city_pos.add(new_city);
                             }
-                            tempcitymin.add(tempmin);
-                            tempcitymax.add(tempmax);
+                            else
+                                city_pos.get(i).add(tempmin  + (int)factory.getBegin());
+                            tempcitymin.add(tempmin  + (int)factory.getBegin());
+                            tempcitymax.add(tempmax  + (int)factory.getBegin());
                             builder.setSpan(new BackgroundColorSpan(getResources().getColor(R.color.cityspan)), tempmin,tempmax, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-                            if(country.size()==0){
+                            if(city.size()==0){
                                 city_country.add("");
                                 storeTag(1);
                                 Toast.makeText(ReadActivity.this, "你还没有标注过一个国家", Toast.LENGTH_SHORT).show();
@@ -419,9 +453,14 @@ public class ReadActivity extends AppCompatActivity implements GestureDetector.O
                             }
                             if(!exists3||person.size()==0){
                                 person.add(selectedText);
+                                ArrayList<Integer> new_person = new ArrayList<>();
+                                new_person.add(tempmin  + (int)factory.getBegin());
+                                person_pos.add(new_person);
                             }
-                            temppersonmin.add(tempmin);
-                            temppersonmax.add(tempmax);
+                            else
+                                person_pos.get(i).add(tempmin  + (int)factory.getBegin());
+                            temppersonmin.add(tempmin + (int)factory.getBegin());
+                            temppersonmax.add(tempmax + (int)factory.getBegin());
                             builder.setSpan(new BackgroundColorSpan(getResources().getColor(R.color.personspan)), tempmin, tempmax, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             if(country.size()==0){
                                 person_country.add("");
@@ -551,6 +590,7 @@ public class ReadActivity extends AppCompatActivity implements GestureDetector.O
         }
         showtext.setText(tempstring);
         storePage(factory.GetCurrentPageNum());
+        refreshSpan();
         readprogress.setText("当前为第"+factory.GetCurrentPageNum()+"页");
     }
 
@@ -563,6 +603,7 @@ public class ReadActivity extends AppCompatActivity implements GestureDetector.O
         }
         showtext.setText(tempstring);
         storePage(factory.GetCurrentPageNum());
+        refreshSpan();
         readprogress.setText("当前为第"+factory.GetCurrentPageNum()+"页");
     }
 
@@ -642,6 +683,27 @@ public class ReadActivity extends AppCompatActivity implements GestureDetector.O
 
     }
 
+    public void refreshSpan(){
+        int offset = (int)factory.getBegin();
+        int size = (int)factory.getPageSize();
+        for(int i = 0; i < tempcountrymin.size(); i++){
+            System.out.println(tempcountrymin.get(i) + "compared with "+ offset);
+            if(offset < tempcountrymin.get(i) && tempcountrymin.get(i) < offset + size)
+                builder.setSpan(new BackgroundColorSpan(getResources().getColor(R.color.countryspan)), tempcountrymin.get(i) - offset, size>(tempcountrymax.get(i) - offset)?(tempcountrymax.get(i) - offset):size, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        for(int i = 0; i < tempcitymin.size(); i++){
+            if(offset < tempcitymin.get(i) && tempcitymin.get(i) < offset + size)
+                builder.setSpan(new BackgroundColorSpan(getResources().getColor(R.color.cityspan)), tempcitymin.get(i) - offset, size>(tempcitymax.get(i) - offset)?(tempcitymax.get(i) - offset):size, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        for(int i = 0; i < temppersonmin.size(); i++){
+            if(offset < temppersonmin.get(i) && temppersonmin.get(i) < offset + size)
+                builder.setSpan(new BackgroundColorSpan(getResources().getColor(R.color.personspan)), temppersonmin.get(i) - offset, size>(temppersonmax.get(i) - offset)?(temppersonmax.get(i) - offset):size, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+
+        showtext.setText(builder);
+
+    }
+
     public void storePage(long page){
         JSONObject inf;
         inf = new JSONObject();
@@ -676,24 +738,26 @@ public class ReadActivity extends AppCompatActivity implements GestureDetector.O
             case 0:
                 try {
                     arr.put("type", "country");
+                    arr.put("filePath", file);
                     JSONArray jCountry = new JSONArray();
-                    JSONArray jCountrymax = new JSONArray();
-                    JSONArray jCountrymin = new JSONArray();
-                    for (int i = 0; i < country.size(); i++)
-                        jCountry.put(i, country.get(i));
-                    for (int i = 0; i< tempcountrymax.size(); i++){
-                        jCountrymax.put(i, tempcountrymax.get(i));
-                        jCountrymin.put(i, tempcountrymin.get(i));
+                    for (int i = 0; i < country.size(); i++){
+                        JSONObject ACountry = new JSONObject();
+                        JSONArray jCountrypos = new JSONArray();
+                        for (int j = 0; j< country_pos.get(i).size(); j++){
+                            jCountrypos.put(country_pos.get(i).get(j));
+                            System.out.println(country_pos.get(i).get(j));
+                        }
+                        ACountry.put("country_name", country.get(i));
+                        ACountry.put("country_pos", jCountrypos);
+                        jCountry.put(i, ACountry);
                     }
                     arr.put("country", jCountry);
-                    arr.put("countrymax", jCountrymax);
-                    arr.put("countrymin", jCountrymin);
                     System.out.println(arr.toString());
                     array.put(arr);
                     inf.put("read", array);
                     System.out.println(array.toString());
                     System.out.println(inf.toString());
-    
+
                     File country_file = new File(dir, "/note/country");
                     if (country_file.exists()) country_file.delete();
                     country_file.createNewFile();
@@ -709,28 +773,31 @@ public class ReadActivity extends AppCompatActivity implements GestureDetector.O
             case 1:
                 try {
                     arr.put("type", "city");
+                    arr.put("filePath", file);
                     JSONArray jCity = new JSONArray();
-                    JSONArray jCityCountry = new JSONArray();
-                    JSONArray jCitymax = new JSONArray();
-                    JSONArray jCitymin = new JSONArray();
-                    for (int i = 0; i < city.size(); i++) {
-                        jCity.put(i, city.get(i));
-                        jCityCountry.put(i, city_country.get(i));
-                    }
-                    for(int i = 0; i < tempcitymax.size(); i++){
-                        jCitymax.put(i, tempcitymax.get(i));
-                        jCitymin.put(i, tempcitymin.get(i));
+                    for (int i = 0; i < city.size(); i++){
+                        JSONObject ACity = new JSONObject();
+                        JSONArray jCitypos = new JSONArray();
+                        for (int j = 0; j< city_pos.get(i).size(); j++){
+                            jCitypos.put(city_pos.get(i).get(j));
+                            System.out.println(city_pos.get(i).get(j));
+                        }
+                        ACity.put("city_name", city.get(i));
+                        ACity.put("city_country", city_country.get(i));
+                        ACity.put("city_pos", jCitypos);
+                        jCity.put(i, ACity);
                     }
                     arr.put("city", jCity);
-                    arr.put("city_country", jCityCountry);
-                    arr.put("citymax", jCitymax);
-                    arr.put("citymin", jCitymin);
+                    System.out.println(arr.toString());
+                    array.put(arr);
+                    inf.put("read", array);
+
                     System.out.println(arr.toString());
                     array.put(arr);
                     inf.put("read", array);
                     System.out.println(array.toString());
                     System.out.println(inf.toString());
-    
+
                     File city_file = new File(dir, "/note/city");
                     if (city_file.exists()) city_file.delete();
                     city_file.createNewFile();
@@ -746,27 +813,24 @@ public class ReadActivity extends AppCompatActivity implements GestureDetector.O
             case 2:
                 try {
                     arr.put("type", "person");
+                    arr.put("filePath", file);
                     JSONArray jPerson = new JSONArray();
-                    JSONArray jPersonCountry = new JSONArray();
-                    JSONArray jPersonmax = new JSONArray();
-                    JSONArray jPersonmin = new JSONArray();
-                    for (int i = 0; i < person.size(); i++) {
-                        jPerson.put(i, person.get(i));
-                        jPersonCountry.put(i, person_country.get(i));
-                    }
-                    for(int i = 0; i < temppersonmax.size(); i++){
-                        jPersonmax.put(i, temppersonmax.get(i));
-                        jPersonmin.put(i, temppersonmin.get(i));
+                    for (int i = 0; i < person.size(); i++){
+                        JSONObject APerson = new JSONObject();
+                        JSONArray jPersonpos = new JSONArray();
+                        for (int j = 0; j< person_pos.get(i).size(); j++){
+                            jPersonpos.put(person_pos.get(i).get(j));
+                            System.out.println(person_pos.get(i).get(j));
+                        }
+                        APerson.put("person_name", person.get(i));
+                        APerson.put("person_country", person_country.get(i));
+                        APerson.put("person_pos", jPersonpos);
+                        jPerson.put(i, APerson);
                     }
                     arr.put("person", jPerson);
-                    arr.put("person_country", jPersonCountry);
-                    arr.put("personmax", jPersonmax);
-                    arr.put("personmin", jPersonmin);
                     System.out.println(arr.toString());
                     array.put(arr);
                     inf.put("read", array);
-                    System.out.println(array.toString());
-                    System.out.println(inf.toString());
 
                     File person_file = new File(dir, "/note/person");
                     if (person_file.exists()) person_file.delete();

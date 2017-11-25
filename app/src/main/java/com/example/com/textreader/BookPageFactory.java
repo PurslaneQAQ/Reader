@@ -2,8 +2,11 @@ package com.example.com.textreader;
 
 import android.widget.Toast;
 
+import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
@@ -34,8 +37,12 @@ public class BookPageFactory {
     private long prepageSize=0;//当前页的前一页大小
     private ArrayList<Long> pagesizes;
     private int pagenum=1;//记录当前页码
+    public String[] st;
 
     private boolean FLAG_END = false;
+    private File bookFile;
+
+    public ArrayList<Long> sentences;
 
     /**
      * 从开始位置打开书本
@@ -44,9 +51,94 @@ public class BookPageFactory {
      */
     public void openBook(File bookFile) throws IOException {
         this.begin = 0;
+        this.bookFile = bookFile;
         randomAccessFile = new RandomAccessFile(bookFile, "r");//只读方式打开文件，安装randomAccessFile读取
         pagesizes=new ArrayList<Long>();
-        //randomAccessFile.seek(begin);
+        sentences=new ArrayList<Long>();
+        //sentences.add((long)0);
+    }
+
+    public void loadSentences(){
+//        long sign = 0;//标记当前页读取了几多字符
+        String result = "";//读取结果字符串
+//        byte[] bytes = new byte[3 * lenW];//汉语占三个字节所以byte最大应该为3倍的lenW
+//        try {
+//            randomAccessFile.seek(sign);
+//            //System.out.println("begin="+begin);
+
+//            while(true) {//读取能显示的最大行数
+//                bytes = new byte[3 * lenW];
+//                int l = 0;//l用来标记bytes的坐标
+//                for (int k = 0; k < 2 * lenW; k++) {
+//                    bytes[++l] = randomAccessFile.readByte();
+//                    sign++;
+//                    if (bytes[l] == 10) {//遇到换行符换到下一行
+////                        if (i == lenH - 1) {
+////                            FLAG_END = true;//读到最后一行了
+////                        }
+////                        break;
+//                    } else if (bytes[l] < 0) {//汉字读取
+//                        if (l < (3 * lenW - 2)) {//当前行剩余的空间能够在剩一个汉字
+//                            //汉字在utf-8中占三个字节，读取一个字节后再额外读两个字节
+//                            byte temp[] = new byte[3];
+//                            temp[0] = bytes[l];
+//                            bytes[++l] = randomAccessFile.readByte();
+//                            sign++;
+//                            temp[0] = bytes[l];
+//                            bytes[++l] = randomAccessFile.readByte();
+//                            sign++;
+//                            temp[0] = bytes[l];
+//                            k++;//汉字展示是英文的两倍的宽度，所以占的字符宽度要+1
+//                        } else {
+//                            bytes[l] = 0;
+//                            randomAccessFile.seek(--sign);
+//                            break;
+//                        }
+//                    }
+//                }
+//                result += new String(bytes);
+//                //System.out.println(new String(bytes));
+//            }
+//        } catch (EOFException e){//到达文件尾
+//            if (sign-begin>0){
+//                result += new String(bytes);
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            if (sign-begin>0){
+//                result += new String(bytes);
+//            }
+//        }
+        try{
+            FileInputStream is = new FileInputStream(bookFile.toString());
+            byte[] arrayOfByte = new byte[is.available()];
+            is.read(arrayOfByte);
+            result = new String(arrayOfByte);
+        }catch(IOException e){
+            System.out.println("failed to load");
+        }
+        System.out.println("Try to break" + result);
+        String regex = "[。！？…]";
+        st = result.split(regex);
+        long former = 0;
+        for(int i = 0; i < st.length; i++){
+            sentences.add(former + former/lenW * 2);
+            former += st[i].length() + 1;
+        }
+        System.out.println("Try to break" + result + sentences);
+    }
+
+    public String getSentence(int id){
+//        byte[] b = null;
+//        try{
+//            int size = (int)(((id < sentences.size()-1)? (sentences.get(id + 1)) :randomAccessFile.length())- sentences.get(id));
+//            b = new byte[size];
+//            randomAccessFile.read(b, sentences.get(id).intValue(), size);
+//        }catch (IOException e){
+//            System.out.println("Can not get file");
+//        }
+//        return b.toString();
+        return st[id];
     }
 
     /**
@@ -78,10 +170,14 @@ public class BookPageFactory {
                     } else if (bytes[l] < 0) {//汉字读取
                         if (l < (3 * lenW - 2)) {//当前行剩余的空间能够在剩一个汉字
                             //汉字在utf-8中占三个字节，读取一个字节后再额外读两个字节
+                            byte temp[] = new byte[3];
+                            temp[0] = bytes[l];
                             bytes[++l] = randomAccessFile.readByte();
                             sign++;
+                            temp[0] = bytes[l];
                             bytes[++l] = randomAccessFile.readByte();
                             sign++;
+                            temp[0] = bytes[l];
                             k++;//汉字展示是英文的两倍的宽度，所以占的字符宽度要+1
                         } else {
                             bytes[l] = 0;
@@ -183,12 +279,19 @@ public class BookPageFactory {
     }
 
     public String setCurrentPageNum(long page){
+        if(page == 1)return firstPage();
         firstPage();
-        for(long i = 0; i< page; i++){
+        for(long i = 0; i< page-2; i++){
             nextPage();
         }
         return nextPage();
     }
+
+    public long getBegin(){return begin;}
+
+    public long getPageSize(){return pageSize;}
+
+    public long getPageSize(int i){return pagesizes.get(i);}
 
     public long GetCurrentAllPages(){
         return pagesizes.size();
