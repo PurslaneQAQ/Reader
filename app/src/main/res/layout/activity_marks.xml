@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.com.textreader.Marks"
+    android:orientation="vertical">
+    <RelativeLayout
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="#FFFFFF">
+        <TextView
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/txttitle"
+            android:textSize="18sp"
+            android:textColor="#000000"
+            android:maxLines="1"
+            android:layout_centerInParent="true"/>
+        <ImageView
+            android:id="@+id/menubtn"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:src="@drawable/menu"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10dp"/>
+        <ImageView
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:src="@drawable/back"
+            android:id="@+id/backbtn"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"/>
+    </RelativeLayout>
+    <android.support.design.widget.TabLayout
+        android:id="@+id/tabs"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="@color/colorPrimary"
+        app:tabIndicatorColor="@color/colorAccent"
+        app:tabSelectedTextColor="@color/black"
+        app:tabTextColor="@color/black"/>
+    <android.support.v4.view.ViewPager
+        android:id="@+id/viewpager"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" >
+    </android.support.v4.view.ViewPager>
+
+</LinearLayout>

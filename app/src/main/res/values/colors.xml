@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#FFFFFF</color>
+    <color name="colorPrimaryDark">#FFFFFF</color>
+    <color name="colorAccent">#FD5B78</color>
+    <color name="black">#000000</color>
+    <color name="countryspan">#F5C5C5</color>
+    <color name="cityspan">#d5e1ff</color>
+    <color name="personspan">#fffed5</color>
+
+</resources>
