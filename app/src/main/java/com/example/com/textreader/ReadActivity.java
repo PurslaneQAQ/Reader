@@ -178,38 +178,38 @@ public class ReadActivity extends AppCompatActivity implements GestureDetector.O
                 temppersonmax=new ArrayList<Integer>();
 
                 long page = 0;
-                File page_file = new File(dir, "/page");
-                File country_file = new File(dir, "/note/country");
-                File city_file = new File(dir, "/note/city");
-                File person_file = new File(dir, "note/person");
-                if(!dir.exists()){
-                    dir.mkdir();
+//                File page_file = new File(dir, "/page");
+//                File country_file = new File(dir, "/note/country");
+//                File city_file = new File(dir, "/note/city");
+//                File person_file = new File(dir, "note/person");
+                if(!dir.getParentFile().exists()){
+                    dir.getParentFile().mkdir();
                 }
-                if(page_file.exists()){
+//                if(page_file.exists()){
+//                    try{
+//                        FileInputStream is = new FileInputStream(page_file);
+//                        byte[] arrayOfByte = new byte[is.available()];
+//                        is.read(arrayOfByte);
+//                        String page_js = new String(arrayOfByte);
+//                        JSONObject jo = new JSONObject(page_js);
+//                        JSONArray ja = jo.getJSONArray("read");
+//                        if (ja.getJSONObject(0).getString("type").equals("page")) {
+//                            page = ja.getJSONObject(0).getLong("page");
+//                        }
+//                    }catch(IOException e){
+//                        System.out.println("can not get page");
+//                    }catch(JSONException e){
+//                        System.out.println("Page json build failed!");
+//                        e.printStackTrace();
+//                    }
+//                }
+//                if(!country_file.getParentFile().exists()) {
+//                    country_file.getParentFile().mkdirs();
+//                    System.out.println("Create dirs");
+//                }
+                if(dir.exists()){
                     try{
-                        FileInputStream is = new FileInputStream(page_file);
-                        byte[] arrayOfByte = new byte[is.available()];
-                        is.read(arrayOfByte);
-                        String page_js = new String(arrayOfByte);
-                        JSONObject jo = new JSONObject(page_js);
-                        JSONArray ja = jo.getJSONArray("read");
-                        if (ja.getJSONObject(0).getString("type").equals("page")) {
-                            page = ja.getJSONObject(0).getLong("page");
-                        }
-                    }catch(IOException e){
-                        System.out.println("can not get page");
-                    }catch(JSONException e){
-                        System.out.println("Page json build failed!");
-                        e.printStackTrace();
-                    }
-                }
-                if(!country_file.getParentFile().exists()) {
-                    country_file.getParentFile().mkdirs();
-                    System.out.println("Create dirs");
-                }
-                if(country_file.exists()) {
-                    try{
-                        FileInputStream is = new FileInputStream(country_file);
+                        FileInputStream is = new FileInputStream(dir);
                         byte[] arrayOfByte = new byte[is.available()];
                         is.read(arrayOfByte);
                         String country_js = new String(arrayOfByte);
@@ -231,77 +231,126 @@ public class ReadActivity extends AppCompatActivity implements GestureDetector.O
                                 country_pos.add(tempcountrypos);
                             }
                         }
+
+                        System.out.println(ja.getJSONObject(1).getJSONArray("city").toString());
+                        if (ja.getJSONObject(0).getString("type").equals("country")) {
+                            JSONArray jCountry = ja.getJSONObject(0).getJSONArray("country");
+                            for (int i = 0; i < jCountry.length(); i++) {
+                                System.out.println(jCountry.getJSONObject(i).getJSONArray("country_pos"));
+                                country.add(jCountry.getJSONObject(i).getString("country_name"));
+                                ArrayList<Integer> tempcountrypos = new ArrayList<>();
+                                for (int j = 0; j < jCountry.getJSONObject(i).getJSONArray("country_pos").length(); j++) {
+                                    System.out.println("size is " + jCountry.getJSONObject(i).getJSONArray("country_pos").length());
+                                    tempcountrypos.add(jCountry.getJSONObject(i).getJSONArray("country_pos").getInt(j));
+                                    tempcountrymin.add(jCountry.getJSONObject(i).getJSONArray("country_pos").getInt(j));
+                                    tempcountrymax.add(jCountry.getJSONObject(i).getJSONArray("country_pos").getInt(j) + country.get(i).length());
+                                }
+                                country_pos.add(tempcountrypos);
+                            }
+                        }
                     }catch(JSONException e){
                         System.out.println("C Json build failed!");
                         e.printStackTrace();
-                    }catch(IOException e){
+                    }
+                    catch(IOException e){
                         System.out.println("Open country file failed!");
                     }
                 }
-                if(city_file.exists()) {
-                    try{
-                        FileInputStream is = new FileInputStream(city_file);
-                        byte[] arrayOfByte = new byte[is.available()];
-                        is.read(arrayOfByte);
-                        String city_js = new String(arrayOfByte);
-                        JSONObject jo = new JSONObject(city_js);
-                        JSONArray ja = jo.getJSONArray("read");
-                        System.out.println(ja.getJSONObject(0).getJSONArray("city").get(0).toString());
-                        if (ja.getJSONObject(0).getString("type").equals("city")) {
-                            JSONArray jCity = ja.getJSONObject(0).getJSONArray("city");
-                            for(int i = 0; i < jCity.length(); i++) {
-                                System.out.println(jCity.getJSONObject(i).getJSONArray("city_pos"));
-                                city.add(jCity.getJSONObject(i).getString("city_name"));
-                                city_country.add(jCity.getJSONObject(i).getString("city_country"));
-                                ArrayList<Integer> tempcitypos = new ArrayList<>();
-                                for(int j = 0; j < jCity.getJSONObject(i).getJSONArray("city_pos").length();j++){
-                                    System.out.println("size is "+ jCity.getJSONObject(i).getJSONArray("city_pos").length());
-                                    tempcitypos.add(jCity.getJSONObject(i).getJSONArray("city_pos").getInt(j));
-                                    tempcitymin.add(jCity.getJSONObject(i).getJSONArray("city_pos").getInt(j));
-                                    tempcitymax.add(jCity.getJSONObject(i).getJSONArray("city_pos").getInt(j) + city.get(i).length());
-                                }
-                                city_pos.add(tempcitypos);
-                            }
-                        }
-                    }catch(JSONException e){
-                        System.out.println("Json build failed!");
-                        e.printStackTrace();
-                    }catch(IOException e){
-                        System.out.println("Open country file failed!");
-                    }
-                }
-                if(person_file.exists()) {
-                    try{
-                        FileInputStream is = new FileInputStream(person_file);
-                        byte[] arrayOfByte = new byte[is.available()];
-                        is.read(arrayOfByte);
-                        String city_js = new String(arrayOfByte);
-                        JSONObject jo = new JSONObject(city_js);
-                        JSONArray ja = jo.getJSONArray("read");
-                        System.out.println(ja.getJSONObject(0).getJSONArray("person").get(0).toString());
-                        if (ja.getJSONObject(0).getString("type").equals("person")) {
-                            JSONArray jPerson = ja.getJSONObject(0).getJSONArray("person");
-                            for (int i = 0; i < jPerson.length(); i++) {
-                                System.out.println(jPerson.getJSONObject(i).getJSONArray("person_pos"));
-                                person.add(jPerson.getJSONObject(i).getString("person_name"));
-                                person_country.add(jPerson.getJSONObject(i).getString("person_country"));
-                                ArrayList<Integer> temppersonpos = new ArrayList<>();
-                                for (int j = 0; j < jPerson.getJSONObject(i).getJSONArray("person_pos").length(); j++) {
-                                    System.out.println("size is " + jPerson.getJSONObject(i).getJSONArray("person_pos").length());
-                                    temppersonpos.add(jPerson.getJSONObject(i).getJSONArray("person_pos").getInt(j));
-                                    temppersonmin.add(jPerson.getJSONObject(i).getJSONArray("person_pos").getInt(j));
-                                    temppersonmax.add(jPerson.getJSONObject(i).getJSONArray("person_pos").getInt(j) + person.get(i).length());
-                                }
-                                person_pos.add(temppersonpos);
-                            }
-                        }
-                    }catch(JSONException e){
-                        System.out.println("Json build failed!");
-                        e.printStackTrace();
-                    }catch(IOException e){
-                        System.out.println("Open country file failed!");
-                    }
-                }
+//                if(country_file.exists()) {
+//                    try{
+//                        FileInputStream is = new FileInputStream(country_file);
+//                        byte[] arrayOfByte = new byte[is.available()];
+//                        is.read(arrayOfByte);
+//                        String country_js = new String(arrayOfByte);
+//                        JSONObject jo = new JSONObject(country_js);
+//                        JSONArray ja = jo.getJSONArray("read");
+//                        System.out.println(ja.getJSONObject(0).getJSONArray("country").toString());
+//                        if (ja.getJSONObject(0).getString("type").equals("country")) {
+//                            JSONArray jCountry = ja.getJSONObject(0).getJSONArray("country");
+//                            for(int i = 0; i < jCountry.length(); i++) {
+//                                System.out.println(jCountry.getJSONObject(i).getJSONArray("country_pos"));
+//                                country.add(jCountry.getJSONObject(i).getString("country_name"));
+//                                ArrayList<Integer> tempcountrypos = new ArrayList<>();
+//                                for(int j = 0; j < jCountry.getJSONObject(i).getJSONArray("country_pos").length();j++){
+//                                    System.out.println("size is "+ jCountry.getJSONObject(i).getJSONArray("country_pos").length());
+//                                    tempcountrypos.add(jCountry.getJSONObject(i).getJSONArray("country_pos").getInt(j));
+//                                    tempcountrymin.add(jCountry.getJSONObject(i).getJSONArray("country_pos").getInt(j));
+//                                    tempcountrymax.add(jCountry.getJSONObject(i).getJSONArray("country_pos").getInt(j) + country.get(i).length());
+//                                }
+//                                country_pos.add(tempcountrypos);
+//                            }
+//                        }
+//                    }catch(JSONException e){
+//                        System.out.println("C Json build failed!");
+//                        e.printStackTrace();
+//                    }catch(IOException e){
+//                        System.out.println("Open country file failed!");
+//                    }
+//                }
+//                if(city_file.exists()) {
+//                    try{
+//                        FileInputStream is = new FileInputStream(city_file);
+//                        byte[] arrayOfByte = new byte[is.available()];
+//                        is.read(arrayOfByte);
+//                        String city_js = new String(arrayOfByte);
+//                        JSONObject jo = new JSONObject(city_js);
+//                        JSONArray ja = jo.getJSONArray("read");
+//                        System.out.println(ja.getJSONObject(0).getJSONArray("city").get(0).toString());
+//                        if (ja.getJSONObject(0).getString("type").equals("city")) {
+//                            JSONArray jCity = ja.getJSONObject(0).getJSONArray("city");
+//                            for(int i = 0; i < jCity.length(); i++) {
+//                                System.out.println(jCity.getJSONObject(i).getJSONArray("city_pos"));
+//                                city.add(jCity.getJSONObject(i).getString("city_name"));
+//                                city_country.add(jCity.getJSONObject(i).getString("city_country"));
+//                                ArrayList<Integer> tempcitypos = new ArrayList<>();
+//                                for(int j = 0; j < jCity.getJSONObject(i).getJSONArray("city_pos").length();j++){
+//                                    System.out.println("size is "+ jCity.getJSONObject(i).getJSONArray("city_pos").length());
+//                                    tempcitypos.add(jCity.getJSONObject(i).getJSONArray("city_pos").getInt(j));
+//                                    tempcitymin.add(jCity.getJSONObject(i).getJSONArray("city_pos").getInt(j));
+//                                    tempcitymax.add(jCity.getJSONObject(i).getJSONArray("city_pos").getInt(j) + city.get(i).length());
+//                                }
+//                                city_pos.add(tempcitypos);
+//                            }
+//                        }
+//                    }catch(JSONException e){
+//                        System.out.println("Json build failed!");
+//                        e.printStackTrace();
+//                    }catch(IOException e){
+//                        System.out.println("Open country file failed!");
+//                    }
+//                }
+//                if(person_file.exists()) {
+//                    try{
+//                        FileInputStream is = new FileInputStream(person_file);
+//                        byte[] arrayOfByte = new byte[is.available()];
+//                        is.read(arrayOfByte);
+//                        String city_js = new String(arrayOfByte);
+//                        JSONObject jo = new JSONObject(city_js);
+//                        JSONArray ja = jo.getJSONArray("read");
+//                        System.out.println(ja.getJSONObject(0).getJSONArray("person").get(0).toString());
+//                        if (ja.getJSONObject(0).getString("type").equals("person")) {
+//                            JSONArray jPerson = ja.getJSONObject(0).getJSONArray("person");
+//                            for (int i = 0; i < jPerson.length(); i++) {
+//                                System.out.println(jPerson.getJSONObject(i).getJSONArray("person_pos"));
+//                                person.add(jPerson.getJSONObject(i).getString("person_name"));
+//                                person_country.add(jPerson.getJSONObject(i).getString("person_country"));
+//                                ArrayList<Integer> temppersonpos = new ArrayList<>();
+//                                for (int j = 0; j < jPerson.getJSONObject(i).getJSONArray("person_pos").length(); j++) {
+//                                    System.out.println("size is " + jPerson.getJSONObject(i).getJSONArray("person_pos").length());
+//                                    temppersonpos.add(jPerson.getJSONObject(i).getJSONArray("person_pos").getInt(j));
+//                                    temppersonmin.add(jPerson.getJSONObject(i).getJSONArray("person_pos").getInt(j));
+//                                    temppersonmax.add(jPerson.getJSONObject(i).getJSONArray("person_pos").getInt(j) + person.get(i).length());
+//                                }
+//                                person_pos.add(temppersonpos);
+//                            }
+//                        }
+//                    }catch(JSONException e){
+//                        System.out.println("Json build failed!");
+//                        e.printStackTrace();
+//                    }catch(IOException e){
+//                        System.out.println("Open country file failed!");
+//                    }
+//                }
 
                 float v = showtext.getHeight() / showtext.getLineHeight();
                 factory.setLenH((int) v);//行数
@@ -362,10 +411,10 @@ public class ReadActivity extends AppCompatActivity implements GestureDetector.O
                     boolean finished = false;
                     System.out.println("Changed is " + which);
                     int sentense_id = 0;
-                    while(factory.sentences.get(sentense_id) < (int)(factory.getBegin() + tempmin)){
+                    while(factory.sentences.get(sentense_id) < (int)(factory.getBegin()/2 + tempmin)){
                         sentense_id++;
                         if(sentense_id >= factory.sentences.size())break;
-                        System.out.println("sentense id is "+ sentense_id + "number is " + factory.sentences.get(sentense_id) + "compared with" + (factory.getBegin() + tempmin));
+                        System.out.println("sentense id is "+ sentense_id + "number is " + factory.sentences.get(sentense_id) + "compared with" + (int)(factory.getBegin()/2 + tempmin));
                     }
                     sentense_id = sentense_id - 1;
                     System.out.println("sentence is " + factory.getSentence(sentense_id));
@@ -570,11 +619,11 @@ public class ReadActivity extends AppCompatActivity implements GestureDetector.O
                            float velocityY) {
         // TODO Auto-generated method stub
         //向后滑动
-        if (e1.getX() - e2.getX() > 50) {
+        if (e1.getX() - e2.getX() > 75) {
             turn2NextPage();
         }
         // 向前滑动
-        if (e2.getX() - e1.getX() > 50){
+        if (e2.getX() - e1.getX() > 75){
             turn2PrePage();
         }
         return false;

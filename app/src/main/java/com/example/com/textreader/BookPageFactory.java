@@ -123,7 +123,9 @@ public class BookPageFactory {
         long former = 0;
         for(int i = 0; i < st.length; i++){
             sentences.add(former + former/lenW * 2);
-            former += st[i].length() + 1;
+            if(st[i].contains("\n"))
+                former += lenW * 4;
+            former += st[i].length() + 2;
         }
         System.out.println("Try to break" + result + sentences);
     }
@@ -279,7 +281,7 @@ public class BookPageFactory {
     }
 
     public String setCurrentPageNum(long page){
-        if(page == 1)return firstPage();
+        if(page <= 1)return firstPage();
         firstPage();
         for(long i = 0; i< page-2; i++){
             nextPage();
